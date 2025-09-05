@@ -1,0 +1,29 @@
+# FREE Agriculture AI - Core Dependencies Only
+# No expensive APIs, no Docker complexity!
+
+# FastAPI Backend (latest compatible versions)
+fastapi
+uvicorn
+pydantic
+python-multipart
+
+# Supabase (FREE Database)
+supabase
+postgrest
+
+# Google Gemini AI (FREE)
+google-generativeai
+
+# FREE Voice & Language Processing
+langdetect
+SpeechRecognition
+websockets
+
+# FREE Vector Processing 
+numpy
+scikit-learn
+
+# Utilities
+python-dotenv
+aiofiles
+httpx
