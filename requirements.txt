@@ -1,29 +1,28 @@
-# FREE Agriculture AI - Core Dependencies Only
-# No expensive APIs, no Docker complexity!
+# Enhanced Agriculture AI - Railway Deployment
+# Core FastAPI and server dependencies
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+python-multipart==0.0.6
 
-# FastAPI Backend (latest compatible versions)
-fastapi
-uvicorn
-pydantic
-python-multipart
+# AI and Machine Learning
+openai-whisper==20231117
+torch==2.1.1
+transformers==4.36.0
+scikit-learn==1.3.2
+numpy==1.25.2
 
-# Supabase (FREE Database)
-supabase
-postgrest
+# Text-to-Speech
+gtts==2.4.0
 
-# Google Gemini AI (FREE)
-google-generativeai
-
-# FREE Voice & Language Processing
-langdetect
-SpeechRecognition
-websockets
-
-# FREE Vector Processing 
-numpy
-scikit-learn
+# Language Processing
+langdetect==1.0.9
 
 # Utilities
-python-dotenv
-aiofiles
-httpx
+python-dotenv==1.0.0
+aiofiles==23.2.1
+httpx==0.25.2
+
+# For audio processing in Whisper
+librosa==0.10.1
+soundfile==0.12.1

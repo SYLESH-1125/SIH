@@ -1,6 +1,81 @@
-# Agriculture AI Voice Assistant
+# 🌾 Enhanced Global Agriculture AI
 
-A fast, lightweight AI-powered agriculture assistant with voice interaction support. Built with Whisper for speech recognition, Smart Assistant for instant responses, and gTTS for perfect multilingual speech synthesis.
+A comprehensive agriculture assistant with speech recognition, smart RAG, and multi-language support.
+
+## 🚀 Railway Deployment Ready!
+
+This application is optimized for Railway deployment with the following features:
+
+### Features
+- 🎤 **Whisper**: Accurate speech recognition in multiple languages
+- 🤖 **Smart RAG**: Comprehensive crop knowledge base
+- 🔊 **gTTS**: High-quality text-to-speech for Indian languages
+- 🌍 **Global Crops**: Support for cereals, legumes, vegetables, fruits, cash crops
+- 🗣️ **Multilingual**: English, Tamil, Telugu, Malayalam, Hindi
+
+### Supported Crops
+- **Cereals**: Rice, Wheat, Corn, Barley, Oats, Millet
+- **Legumes**: Soybeans, Chickpeas, Lentils, Beans, Peas
+- **Vegetables**: Tomatoes, Potatoes, Onions, Carrots, Cabbage
+- **Fruits**: Apples, Oranges, Bananas, Grapes, Mango
+- **Cash Crops**: Cotton, Sugarcane, Coffee, Tea, Tobacco
+
+## 🛠️ Railway Deployment Instructions
+
+### Step 1: Prepare Your Repository
+All necessary files are already configured:
+- ✅ `whisper_main.py` - Main application
+- ✅ `requirements.txt` - Python dependencies  
+- ✅ `Procfile` - Railway process definition
+- ✅ `railway.toml` - Railway configuration
+
+### Step 2: Deploy to Railway
+1. **Go to [railway.app](https://railway.app)**
+2. **Sign up/Login** with GitHub
+3. **Click "Deploy from GitHub repo"**
+4. **Select your repository** (SIH_2025)
+5. **Click Deploy** - Railway will automatically detect the Python app
+6. **Wait for deployment** (takes 2-3 minutes)
+7. **Access your app** via the provided Railway URL
+
+### Step 3: Test Your Deployment
+- Click the Railway URL
+- Test the agriculture assistant
+- Try voice input and text-to-speech features
+
+## 🌐 No Environment Variables Needed!
+The app runs out of the box - no configuration required.
+
+## 📱 Usage After Deployment
+1. Open the Railway URL
+2. Select your language and profile
+3. Ask agriculture questions via text or voice
+4. Get comprehensive answers with TTS support
+
+## 🔧 Local Development
+```bash
+pip install -r requirements.txt
+python whisper_main.py
+```
+Visit `http://localhost:8002` for local testing.
+
+## 📊 What Gets Deployed
+- **Single FastAPI application** with all features
+- **Whisper AI** for speech recognition
+- **Comprehensive crop database** for all global crops
+- **Multi-language TTS** via Google TTS
+- **Responsive web interface** for easy use
+
+## 🚀 Railway Advantages
+- **Free hosting** for your agriculture AI
+- **Automatic HTTPS** and custom domain
+- **Global CDN** for fast access worldwide
+- **Automatic scaling** based on usage
+- **Zero configuration** deployment
+
+---
+
+**Ready to deploy? Just push to GitHub and deploy on Railway!** 🌾🚀
 
 ## ✨ Key Features
 
