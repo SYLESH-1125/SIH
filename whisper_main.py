@@ -11,8 +11,7 @@ import tempfile
 import os
 import re
 
-# Import lightweight speech recognition and TTS
-import speech_recognition as sr
+# Import lightweight TTS and utilities
 from gtts import gTTS
 import platform
 from langdetect import detect
@@ -25,19 +24,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize speech recognizer with optimized settings
-logger.info("🎤 Initializing Speech Recognition...")
-recognizer = sr.Recognizer()
-
-# Optimize recognizer settings for better voice detection
-recognizer.energy_threshold = 300  # Minimum audio energy to consider for recording
-recognizer.dynamic_energy_threshold = True  # Automatically adjust for ambient noise
-recognizer.pause_threshold = 0.8  # Seconds of silence to mark end of phrase
-recognizer.operation_timeout = None  # No timeout for recognition
-recognizer.phrase_threshold = 0.3  # Minimum seconds of audio before considering phrase
-recognizer.non_speaking_duration = 0.8  # Seconds of silence to stop recording
-
-logger.info("✅ Speech Recognition ready with optimized settings!")
+# Skip server-side speech recognition - using browser-based instead
+logger.info("🎙️ Browser-based speech recognition ready!")
 
 # Skip DialoGPT - too slow and unhelpful!
 logger.info("🌾 Using Fast Agriculture Assistant instead of DialoGPT...")
@@ -835,7 +823,7 @@ async def home():
                     <textarea id="queryInput" placeholder="Type your agriculture question here..."></textarea>
                     <div class="action-buttons">
                         <button class="btn btn-primary" onclick="askAI()">🚀 Ask Smart Assistant</button>
-                        <button class="btn btn-voice" onclick="startWhisperInput()">🎤 Whisper</button>
+                        <button class="btn btn-voice" onclick="startBrowserSpeech()">🎙️ Voice Input</button>
                     </div>
                     <button class="btn btn-secondary" onclick="testTTS()" style="width: 100%; margin-top: 10px;">
                         🔊 Test gTTS (Google TTS)
@@ -1107,6 +1095,59 @@ async def home():
                 }
             }
 
+            // Browser-based speech recognition function
+            function startBrowserSpeech() {
+                console.log('🎙️ Starting browser speech recognition...');
+                
+                const responseDiv = document.getElementById('response');
+                
+                // Check if browser supports speech recognition
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                
+                if (!SpeechRecognition) {
+                    responseDiv.innerHTML = '❌ Speech recognition not supported in this browser. Try Chrome/Edge.';
+                    return;
+                }
+                
+                const recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                
+                // Set language based on selection
+                const selectedLanguage = document.getElementById('languageSelect').value;
+                const langMap = {
+                    'en': 'en-US',
+                    'hi': 'hi-IN',
+                    'ta': 'ta-IN',
+                    'te': 'te-IN',
+                    'ml': 'ml-IN'
+                };
+                recognition.lang = langMap[selectedLanguage] || 'en-US';
+                
+                responseDiv.innerHTML = '🎙️ Listening... Speak your agriculture question!';
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    console.log('✅ Browser speech recognized:', transcript);
+                    
+                    // Put the transcribed text in the input field
+                    document.getElementById('queryInput').value = transcript;
+                    responseDiv.innerHTML = `🎙️ I heard: "${transcript}"\\n\\nClick "Ask Smart Assistant" to get an answer!`;
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('❌ Speech recognition error:', event.error);
+                    responseDiv.innerHTML = `❌ Speech recognition error: ${event.error}`;
+                };
+                
+                recognition.onend = function() {
+                    console.log('🎙️ Speech recognition ended');
+                };
+                
+                // Start recognition
+                recognition.start();
+            }
+
             // Allow Enter key to submit
             document.getElementById('queryInput').addEventListener('keypress', function(event) {
                 if (event.key === 'Enter') {
@@ -1319,32 +1360,28 @@ async def query_agriculture(request: QueryRequest):
 
 @app.post("/whisper-transcribe")
 async def whisper_transcribe(request: dict):
-    """Transcribe audio using Whisper model"""
+    """Server-side speech recognition disabled - use browser speech recognition instead"""
     try:
-        audio_data = request.get("audio_data", "")
         language = request.get("language", "en")
         
-        if not audio_data:
-            raise HTTPException(status_code=400, detail="Audio data is required")
+        logger.info(f"🎙️ Server-side speech recognition disabled - redirecting to browser speech")
         
-        logger.info(f"🎤 Processing audio for speech recognition - {language}")
-        
-        # For now, since audio format conversion is complex without ffmpeg,
-        # let's return a fallback that prompts user to type their query
         return {
-            "success": True,
-            "transcribed_text": "How do I grow rice?",  # Example query to demonstrate functionality
+            "success": False,
+            "transcribed_text": "",
             "detected_language": language,
-            "confidence": 0.5,
-            "message": "Audio processing simplified - try typing your agriculture question!"
+            "confidence": 0.0,
+            "message": "Use the '🎙️ Voice (Browser)' button for speech recognition."
         }
                 
     except Exception as e:
-        logger.error(f"❌ Speech transcription failed: {e}")
+        logger.error(f"❌ Speech transcription endpoint error: {e}")
         return {
             "success": False,
             "error": str(e),
-            "message": "Speech transcription failed"
+            "transcribed_text": "",
+            "detected_language": "en",
+            "confidence": 0.0
         }
 
 @app.post("/generate-tts")

@@ -7,5 +7,4 @@ langdetect==1.0.9
 python-dotenv==1.0.0
 aiofiles==24.1.0
 httpx==0.25.2
-speechrecognition==3.10.4
 scikit-learn
