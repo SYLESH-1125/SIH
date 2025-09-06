@@ -1095,57 +1095,92 @@ async def home():
                 }
             }
 
-            // Browser-based speech recognition function
+            // Browser-based speech recognition function (exact same as working simple test)
             function startBrowserSpeech() {
-                console.log('🎙️ Starting browser speech recognition...');
+                console.log('🗣️ Starting voice recognition...');
                 
-                const responseDiv = document.getElementById('response');
-                
-                // Check if browser supports speech recognition
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                 
                 if (!SpeechRecognition) {
-                    responseDiv.innerHTML = '❌ Speech recognition not supported in this browser. Try Chrome/Edge.';
+                    alert('❌ Speech recognition not supported');
+                    document.getElementById('response').innerHTML = '❌ Speech recognition not supported. Use Chrome or Edge browser.';
                     return;
                 }
                 
-                const recognition = new SpeechRecognition();
+                var recognition = new SpeechRecognition();
                 recognition.continuous = false;
-                recognition.interimResults = false;
+                recognition.interimResults = true;
                 
-                // Set language based on selection
-                const selectedLanguage = document.getElementById('languageSelect').value;
-                const langMap = {
+                // Language mapping
+                var langMap = {
                     'en': 'en-US',
-                    'hi': 'hi-IN',
+                    'hi': 'hi-IN', 
                     'ta': 'ta-IN',
                     'te': 'te-IN',
                     'ml': 'ml-IN'
                 };
                 recognition.lang = langMap[selectedLanguage] || 'en-US';
                 
-                responseDiv.innerHTML = '🎙️ Listening... Speak your agriculture question!';
+                document.getElementById('response').innerHTML = '� 🔴 Listening in ' + recognition.lang + '... Speak your agriculture question now!';
                 
                 recognition.onresult = function(event) {
-                    const transcript = event.results[0][0].transcript;
-                    console.log('✅ Browser speech recognized:', transcript);
+                    var transcript = '';
+                    for (var i = 0; i < event.results.length; i++) {
+                        if (event.results[i].isFinal) {
+                            transcript = event.results[i][0].transcript;
+                            break;
+                        } else {
+                            // Show interim results
+                            var interimTranscript = event.results[i][0].transcript;
+                            document.getElementById('response').innerHTML = '🎙️ Hearing: "' + interimTranscript + '"...';
+                        }
+                    }
                     
-                    // Put the transcribed text in the input field
-                    document.getElementById('queryInput').value = transcript;
-                    responseDiv.innerHTML = `🎙️ I heard: "${transcript}"\\n\\nClick "Ask Smart Assistant" to get an answer!`;
+                    if (transcript) {
+                        console.log('✅ Voice recognized: ' + transcript);
+                        document.getElementById('queryInput').value = transcript;
+                        document.getElementById('response').innerHTML = '✅ Voice input successful: "' + transcript + '"<br>🤔 Getting AI response...';
+                        
+                        // Auto-ask the AI
+                        setTimeout(askAI, 1000);
+                    }
                 };
                 
                 recognition.onerror = function(event) {
-                    console.error('❌ Speech recognition error:', event.error);
-                    responseDiv.innerHTML = `❌ Speech recognition error: ${event.error}`;
+                    console.error('❌ Speech error:', event.error);
+                    var errorMessage = '';
+                    
+                    switch(event.error) {
+                        case 'no-speech':
+                            errorMessage = '❌ No speech detected. Please speak clearly and try again.';
+                            break;
+                        case 'audio-capture':
+                            errorMessage = '❌ Microphone not available. Check permissions and try again.';
+                            break;
+                        case 'not-allowed':
+                            errorMessage = '❌ Microphone permission denied. Please enable microphone access in browser settings.';
+                            break;
+                        case 'network':
+                            errorMessage = '❌ Network error. Check your internet connection.';
+                            break;
+                        default:
+                            errorMessage = '❌ Speech recognition error: ' + event.error;
+                    }
+                    
+                    document.getElementById('response').innerHTML = errorMessage;
+                    alert(errorMessage);
                 };
                 
                 recognition.onend = function() {
-                    console.log('🎙️ Speech recognition ended');
+                    console.log('🔴 Speech recognition ended');
                 };
                 
-                // Start recognition
-                recognition.start();
+                try {
+                    recognition.start();
+                } catch (error) {
+                    console.error('❌ Failed to start speech recognition:', error);
+                    document.getElementById('response').innerHTML = '❌ Could not start speech recognition: ' + error.message;
+                }
             }
 
             // Allow Enter key to submit
