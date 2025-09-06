@@ -3,9 +3,6 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 import logging
 import time
-import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 import json
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -14,20 +11,25 @@ import tempfile
 import os
 import re
 
-# Import the robust TTS stack with gTTS for Indian languages
-import whisper
-from transformers import pipeline
+# Import lightweight speech recognition and TTS
+import speech_recognition as sr
 from gtts import gTTS
 import platform
+from pydub import AudioSegment
+from langdetect import detect
+
+# Import minimal ML dependencies
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Load Whisper model (small = good balance of speed & accuracy)
-logger.info("🎤 Loading Whisper model (this may take a moment)...")
-whisper_model = whisper.load_model("tiny")  # Using tiny model for faster loading
-logger.info("✅ Whisper model loaded successfully!")
+# Initialize speech recognizer
+logger.info("🎤 Initializing Speech Recognition...")
+recognizer = sr.Recognizer()
+logger.info("✅ Speech Recognition ready!")
 
 # Skip DialoGPT - too slow and unhelpful!
 logger.info("🌾 Using Fast Agriculture Assistant instead of DialoGPT...")
@@ -1328,22 +1330,42 @@ async def whisper_transcribe(request: dict):
             temp_audio_path = temp_audio.name
         
         try:
-            # Transcribe with Whisper
-            result = whisper_model.transcribe(
-                temp_audio_path,
-                language=language if language != 'en' else None  # Let Whisper auto-detect if not English
-            )
+            # Use speech recognition instead of Whisper
+            with sr.AudioFile(temp_audio_path) as source:
+                audio = recognizer.record(source)
+                
+            # Try to recognize speech using Google's speech recognition
+            try:
+                if language == 'en':
+                    transcribed_text = recognizer.recognize_google(audio, language='en-US')
+                elif language == 'hi':
+                    transcribed_text = recognizer.recognize_google(audio, language='hi-IN')
+                elif language == 'ta':
+                    transcribed_text = recognizer.recognize_google(audio, language='ta-IN')
+                elif language == 'te':
+                    transcribed_text = recognizer.recognize_google(audio, language='te-IN')
+                elif language == 'ml':
+                    transcribed_text = recognizer.recognize_google(audio, language='ml-IN')
+                else:
+                    transcribed_text = recognizer.recognize_google(audio)
+                    
+                detected_language = language
+                
+            except sr.UnknownValueError:
+                transcribed_text = ""
+                detected_language = language
+            except sr.RequestError:
+                # Fallback to English if service is unavailable
+                transcribed_text = recognizer.recognize_google(audio, language='en-US')
+                detected_language = 'en'
             
-            transcribed_text = result["text"].strip()
-            detected_language = result.get("language", language)
-            
-            logger.info(f"✅ Whisper transcription: '{transcribed_text[:50]}...'")
+            logger.info(f"✅ Speech recognition: '{transcribed_text[:50]}...'")
             
             return {
                 "success": True,
                 "transcribed_text": transcribed_text,
                 "detected_language": detected_language,
-                "confidence": result.get("avg_logprob", 0.8)
+                "confidence": 0.8 if transcribed_text else 0.0
             }
             
         finally:
